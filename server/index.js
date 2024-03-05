@@ -171,19 +171,21 @@
 const express = require('express');
 const cors = require('cors');
 require('./config');
+
 const userfileRef = require('./users');
 const Post = require('./postModal');
 
 const Jwt = require('jsonwebtoken');
 const { LEGAL_TCP_SOCKET_OPTIONS } = require('mongodb');
-const jwtKey = 'e-comm';
+const jwtKey = 'e-comm1';
 
 const app = express();
 app.use(cors());
 app.use(express.json());
 // In the post route, I am adding comments to understand properly the working of route
 // Handling POST requests to the '/register' endpoint for registration signup
-app.post('/register/', async (req, resp) => {
+app.post('/register', async (req, resp) => {
+  console.log(req.body);
     // Creating a new user instance with the data from the request body
     let userRef = new userfileRef(req.body);
     // Saving the new user to the database
@@ -202,6 +204,24 @@ app.post('/register/', async (req, resp) => {
     // Sending the result back as the response
 
 })
+app.get('/posts', async (req, res) => {
+    try {
+      const page = parseInt(req.query.page) || 1;
+      const limit = parseInt(req.query.limit) || 10;
+      const skip = (page - 1) * limit;
+  
+      // Fetch posts from the database with pagination
+      const posts = await Post.find().skip(skip).limit(limit);
+  
+      // Respond with the fetched posts
+      res.json(posts);
+    } catch (error) {
+      // If an error occurs, respond with an error message
+      console.error("Error fetching posts:", error);
+      res.status(500).json({ error: "An error occurred while fetching posts" });
+    }
+  });
+  
 app.listen(3200,()=>{
   console.log("port connected")
 });
