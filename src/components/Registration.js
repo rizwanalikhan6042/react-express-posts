@@ -69,35 +69,33 @@ const Registration = () => {
     setFormErrors(validateForm(userDetails));
     setIsFormSubmitted(true);
   };
-  const fetchData = () => {
-    if (Object.keys(formErrors).length === 0 && isFormSubmitted) {
-      fetch('http://localhost:8000/register/', {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-        },
-        body: JSON.stringify(userDetails),
-      })
-      .then(response => {
-        if (!response.ok) {
-          throw new Error('Network response was not ok');
-        }
-        return response.json();
-      })
-      .then(data => {
-        console.log(data);
+  const fetchData = async (e) => {
+    e.preventDefault();
+    
+    // Validate form
+    const errors = validateForm(userDetails);
+    setFormErrors(errors);
+    
+    if (Object.keys(errors).length === 0) {
+      try {
+        const response = await axios.post('http://localhost:3200/register', userDetails);
+        
+        console.log(response.data);
         navigate('/posts');
-      })
-      .catch(error => {
+      } catch (error) {
         console.error('Error:', error);
         // Handle error as needed
-      });
+      }
+    } else {
+      // Form has errors, do not proceed with submission
+      console.log('Form has errors:', errors);
     }
   };
   
-  useEffect(() => {
-    fetchData();
-  }, [formErrors, isFormSubmitted]);
+  
+  // useEffect(() => {
+  //   fetchData();
+  // }, [formErrors, isFormSubmitted]);
     
   // useEffect(() => {
   //   if (Object.keys(formErrors).length === 0 && isFormSubmitted) {
@@ -113,7 +111,7 @@ const Registration = () => {
   return (
     <>
       <div className="flex justify-center items-center h-screen">
-        <form className="bg-white shadow-md rounded px-8 pt-6 pb-8 mb-4 w-full max-w-md">
+        <form onSubmit={fetchData} className="bg-white shadow-md rounded px-8 pt-6 pb-8 mb-4 w-full max-w-md">
           <h1 className="text-2xl text-center mb-4">Create an Account</h1>
           <div className="mb-4">
             <input
@@ -187,8 +185,8 @@ const Registration = () => {
           <div className="flex items-center justify-between">
             <button
               className="bg-blue-500 hover:bg-blue-700 text-white font-bold py-2 px-4 rounded focus:outline-none focus:shadow-outline"
-              type="button"
-              onClick={handleSignup}
+              type = 'submit'
+              // onClick={fetchData}
             >
               Register
             </button>
