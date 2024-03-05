@@ -21,6 +21,14 @@ const postSchema = new mongoose.Schema({
     type: Date,
     default: Date.now
   },
+  viewCount: {
+    type: Number,
+    default: 0
+  },
+  category: {
+    type: String,
+    required: true
+  }
   // Add other fields as needed
 });
 

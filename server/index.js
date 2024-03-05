@@ -186,42 +186,63 @@ app.use(express.json());
 // Handling POST requests to the '/register' endpoint for registration signup
 app.post('/register', async (req, resp) => {
   console.log(req.body);
-    // Creating a new user instance with the data from the request body
-    let userRef = new userfileRef(req.body);
-    // Saving the new user to the database
-    let result = await userRef.save();
-    // For the sign up registration API, removing the password in response
-    result = result.toObject();
-    delete result.password;
-    Jwt.sign({ result }, jwtKey, { expiresIn: '2h' }, (err, token) => {
-        if (err) {
-            resp.send({ result: "Something went wrong,Please try again after sometime!" });
-        }
-        resp.send({ result, auth: token });
-    })
+  // Creating a new user instance with the data from the request body
+  let userRef = new userfileRef(req.body);
+  // Saving the new user to the database
+  let result = await userRef.save();
+  // For the sign up registration API, removing the password in response
+  result = result.toObject();
+  delete result.password;
+  Jwt.sign({ result }, jwtKey, { expiresIn: '2h' }, (err, token) => {
+    if (err) {
+      resp.send({ result: "Something went wrong,Please try again after sometime!" });
+    }
+    resp.send({ result, auth: token });
+  })
 
-    console.log(result);
-    // Sending the result back as the response
+  console.log(result);
+  // Sending the result back as the response
 
 })
-app.get('/posts', async (req, res) => {
-    try {
-      const page = parseInt(req.query.page) || 1;
-      const limit = parseInt(req.query.limit) || 10;
-      const skip = (page - 1) * limit;
-  
-      // Fetch posts from the database with pagination
-      const posts = await Post.find().skip(skip).limit(limit);
-  
-      // Respond with the fetched posts
-      res.json(posts);
-    } catch (error) {
-      // If an error occurs, respond with an error message
-      console.error("Error fetching posts:", error);
-      res.status(500).json({ error: "An error occurred while fetching posts" });
-    }
-  });
-  
-app.listen(3200,()=>{
+app.get('/posts', verifyToken, async (req, res) => {
+  try {
+    const page = parseInt(req.query.page) || 1;
+    const limit = parseInt(req.query.limit) || 10;
+    const skip = (page - 1) * limit;
+
+    // Fetch posts from the database with pagination
+    const posts = await Post.find().skip(skip).limit(limit);
+
+    // Respond with the fetched posts
+    res.json(posts);
+  } catch (error) {
+    // If an error occurs, respond with an error message
+    console.error("Error fetching posts:", error);
+    res.status(500).json({ error: "An error occurred while fetching posts" });
+  }
+});
+function verifyToken(req, resp, next) {
+  next();
+  return
+  let token = req.headers['authorization'];
+
+  if (token) {
+    token = token.split(' ')[1];
+    console.log("middleware called", token);
+    Jwt.verify(token, jwtKey, (err, valid) => {
+      if (err) {
+        resp.status(401).send({ result: "Please provide valid token" });
+      } else {
+        next();
+      }
+    })
+
+  } else {
+    resp.status(403).send({ result: "Please add token with header" });
+  }
+
+}
+app.listen(3200, () => {
   console.log("port connected")
 });
+
