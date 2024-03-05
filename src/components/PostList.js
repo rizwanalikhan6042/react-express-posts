@@ -13,7 +13,7 @@ const PostList = () => {
   }, []);
 
   const fetchPosts = () => {
-    fetch(`http://localhost:8000/posts?page=${page}&limit=10`)
+    fetch(`http://localhost:3200/posts?page=${page}&limit=10`)
       .then(response => {
         if (!response.ok) {
           throw new Error('Network response was not ok');
