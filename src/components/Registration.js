@@ -3,10 +3,11 @@ import axios from "axios";
 import { useNavigate, NavLink } from "react-router-dom";
 
 const Registration = () => {
-  const navigateTo = useNavigate();
+  const navigate = useNavigate();
 
   const [formErrors, setFormErrors] = useState({});
   const [isFormSubmitted, setIsFormSubmitted] = useState(false);
+  const [pageNum, setPageNum] = useState(1);
   const [userDetails, setUserDetails] = useState({
     firstName: "",
     lastName: "",
@@ -68,15 +69,46 @@ const Registration = () => {
     setFormErrors(validateForm(userDetails));
     setIsFormSubmitted(true);
   };
-
-  useEffect(() => {
+  const fetchData = () => {
     if (Object.keys(formErrors).length === 0 && isFormSubmitted) {
-      axios.post("http://example.com/signup", userDetails).then((response) => {
-        alert(response.data.message);
-        navigateTo("/login", { replace: true });
+      fetch('http://localhost:8000/register/', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify(userDetails),
+      })
+      .then(response => {
+        if (!response.ok) {
+          throw new Error('Network response was not ok');
+        }
+        return response.json();
+      })
+      .then(data => {
+        console.log(data);
+        navigate('/posts');
+      })
+      .catch(error => {
+        console.error('Error:', error);
+        // Handle error as needed
       });
     }
-  }, [formErrors]);
+  };
+  
+  useEffect(() => {
+    fetchData();
+  }, [formErrors, isFormSubmitted]);
+    
+  // useEffect(() => {
+  //   if (Object.keys(formErrors).length === 0 && isFormSubmitted) {
+  //     axios.post('http://localhost:3200/register/', userDetails).then((response) => {
+  //       // alert(response.data.message);
+  //       // navigateTo("/login", { replace: true });
+  //       console.log(response.data);
+  //      navigate('/posts')
+  //     });
+  //   }
+  // }, [formErrors , pageNum]);
 
   return (
     <>
