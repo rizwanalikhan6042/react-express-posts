@@ -68,7 +68,11 @@ const PostList = () => {
   }, []);
 
   const fetchPosts = () => {
-    axios.get(`http://localhost:3200/posts?page=${page}&limit=4`)
+    axios.get(`http://localhost:3200/posts?page=${page}&limit=4`,{
+      headers: {                  // Authorization header with bearer token
+        authorization: `bearer ${JSON.parse(localStorage.getItem('token'))}`
+    }
+    } )
       .then(response => {
         setPosts(prevPosts => [...prevPosts, ...response.data]);
         setPage(page + 1);

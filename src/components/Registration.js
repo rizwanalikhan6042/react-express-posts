@@ -70,29 +70,52 @@ const Registration = () => {
     setIsFormSubmitted(true);
   };
   const fetchData = async (e) => {
-    e.preventDefault();
+    // e.preventDefault();
     
-    // Validate form
-    const errors = validateForm(userDetails);
-    setFormErrors(errors);
+    // // Validate form
+    // const errors = validateForm(userDetails);
+    // setFormErrors(errors);
     
-    if (Object.keys(errors).length === 0) {
-      try {
-        const response = await axios.post('http://localhost:3200/register', userDetails);
-        
-        console.log(response.data);
-        navigate('/posts');
-      } catch (error) {
-        console.error('Error:', error);
-        // Handle error as needed
+    // if (Object.keys(errors).length === 0) {
+    //   try {
+    //     const response = await axios.post('http://localhost:3200/register', userDetails);
+    //     console.log(userDetails);
+    //     // localStorage.setItem('token', JSON.stringify(response.auth));
+    //     console.log(response.data);
+    //     navigate('/posts');
+    //   } catch (error) {
+    //     console.error('Error:', error);
+    //     // Handle error as needed
+    //   }
+    // } else {
+    //   // Form has errors, do not proceed with submission
+    //   console.log('Form has errors:', errors);
+    // }
+    e.preventDefault()
+    const { firstName, lastName, emailAddress, password } = userDetails;
+   const result =  axios.post('http://localhost:3200/register', {
+      firstName,
+      lastName,
+      emailAddress,
+      password
+    }, {
+      headers: {
+        'Content-Type': 'application/json'
       }
-    } else {
-      // Form has errors, do not proceed with submission
-      console.log('Form has errors:', errors);
-    }
-  };
-  
-  
+    })
+    .then((response) => {
+      const result = response.data;
+      console.log(result);
+      // Storing the user's data and authentication token in the browser's local storage
+      localStorage.setItem('user', JSON.stringify(result.result));
+      localStorage.setItem('token', JSON.stringify(result.auth));
+      navigate('/posts'); // If registration is successful, navigate to the home page
+    })
+    .catch((error) => {
+      console.error("Error registering user:", error);
+    });
+    
+  }
   // useEffect(() => {
   //   fetchData();
   // }, [formErrors, isFormSubmitted]);

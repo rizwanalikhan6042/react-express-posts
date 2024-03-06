@@ -222,8 +222,8 @@ app.get('/posts', verifyToken, async (req, res) => {
   }
 });
 function verifyToken(req, resp, next) {
-  next();
-  return
+  
+  
   let token = req.headers['authorization'];
 
   if (token) {
