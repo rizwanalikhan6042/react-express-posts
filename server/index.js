@@ -168,81 +168,302 @@
 // app.listen(3201,()=>{
 //     console.log("port connected");
 // })
+// const express = require('express');
+// const cors = require('cors');
+// require('./config');
+
+// const userfileRef = require('./users');
+// const Post = require('./postModal');
+
+// const Jwt = require('jsonwebtoken');
+// const { LEGAL_TCP_SOCKET_OPTIONS } = require('mongodb');
+// const jwtKey = 'e-comm1';
+
+// const app = express();
+// app.use(cors());
+// app.use(express.json());
+// // In the post route, I am adding comments to understand properly the working of route
+// // Handling POST requests to the '/register' endpoint for registration signup
+// app.post('/register', async (req, resp) => {
+//   console.log(req.body);
+//   // Creating a new user instance with the data from the request body
+//   let userRef = new userfileRef(req.body);
+//   const existingUser = await userRef.findOne({ emailAddress });
+//   if (existingUser) {
+//     return resp.status(400).json({ message: 'Email address already in use' });
+//   }
+//   const hashedPassword = await bcrypt.hash(password, 10);
+//   // Saving the new user to the database
+//   let result = await userRef.save();
+//   // For the sign up registration API, removing the password in response
+//   result = result.toObject();
+//   delete result.password;
+//   Jwt.sign({ result }, jwtKey, { expiresIn: '2h' }, (err, token) => {
+//     if (err) {
+//       resp.send({ result: "Something went wrong,Please try again after sometime!" });
+//     }
+//     resp.send({ result, auth: token });
+//   })
+
+//   console.log(result);
+//   // Sending the result back as the response
+
+// })
+// app.get('/posts', verifyToken, async (req, res) => {
+//   try {
+//     const page = parseInt(req.query.page) || 1;
+//     const limit = parseInt(req.query.limit) || 10;
+//     const skip = (page - 1) * limit;
+
+//     // Fetch posts from the database with pagination
+//     const posts = await Post.find().skip(skip).limit(limit);
+
+//     // Respond with the fetched posts
+//     res.json(posts);
+//   } catch (error) {
+//     // If an error occurs, respond with an error message
+//     console.error("Error fetching posts:", error);
+//     res.status(500).json({ error: "An error occurred while fetching posts" });
+//   }
+// });
+// function verifyToken(req, resp, next) {
+  
+  
+//   let token = req.headers['authorization'];
+
+//   if (token) {
+//     token = token.split(' ')[1];
+//     console.log("middleware called", token);
+//     Jwt.verify(token, jwtKey, (err, valid) => {
+//       if (err) {
+//         resp.status(401).send({ result: "Please provide valid token" });
+//       } else {
+//         next();
+//       }
+//     })
+
+//   } else {
+//     resp.status(403).send({ result: "Please add token with header" });
+//   }
+
+// }
+// app.listen(3200, () => {
+//   console.log("port connected")
+// });
+// const express = require('express');
+// const cors = require('cors');
+// const bcrypt = require('bcrypt');
+// const jwt = require('jsonwebtoken');
+// require('./config');
+// const User = require('./users'); // Assuming the user model is defined in 'users.js'
+// const Post = require('./postModal');
+
+// const app = express();
+// const PORT = 3200;
+// const JWT_SECRET = 'e-comm-secret-key';
+
+// app.use(cors());
+// app.use(express.json());
+
+// // User Registration
+// app.post('/register', async (req, res) => {
+//   try {
+//     const { firstName, lastName, emailAddress, password } = req.body;
+
+//     // Check if user already exists
+//     const existingUser = await User.findOne({ emailAddress });
+
+//     if (existingUser) {
+//       return res.status(400).json({ message: 'Email address already in use' });
+//     }
+
+//     // Hash password
+//     const hashedPassword = await bcrypt.hash(password, 10);
+
+//     // Create new user
+//     const newUser = new User({
+//       firstName,
+//       lastName,
+//       emailAddress,
+//       password: hashedPassword,
+//     });
+
+//     // Save user to the database
+//     await newUser.save();
+
+//     // Generate JWT token
+//     const token = jwt.sign({ userId: newUser._id }, JWT_SECRET, { expiresIn: '2h' });
+
+//     // Return success response with token
+   
+      
+//           resp.send({ result, auth: token });
+      
+//   } catch (error) {
+//     console.error('Error registering user:', error);
+//     res.status(500).json({ message: 'Internal server error' });
+//   }
+// });
+
+// // Fetch Posts
+// app.get('/posts', authenticateToken, async (req, res) => {
+//   try {
+//     const page = parseInt(req.query.page) || 1;
+//     const limit = parseInt(req.query.limit) || 10;
+//     const skip = (page - 1) * limit;
+
+//     // Fetch posts with pagination
+//     const posts = await Post.find().skip(skip).limit(limit);
+
+//     // Return posts
+//     res.json(posts);
+//   } catch (error) {
+//     console.error('Error fetching posts:', error);
+//     res.status(500).json({ message: 'Internal server error' });
+//   }
+// });
+
+// // Middleware to authenticate JWT token
+// function authenticateToken(req, res, next) {
+//   const token = req.headers['authorization'];
+
+//   if (!token) {
+//     return res.status(401).json({ message: 'Unauthorized: Missing token' });
+//   }
+
+//   jwt.verify(token.split(' ')[1], JWT_SECRET, (err, decoded) => {
+//     if (err) {
+//       return res.status(403).json({ message: 'Forbidden: Invalid token' });
+//     }
+
+//     req.userId = decoded.userId;
+//     next();
+//   });
+// }
+
+// // Start server
+// app.listen(3200, () => {
+//   console.log("port connected")
+// });
 const express = require('express');
 const cors = require('cors');
+const bcrypt = require('bcrypt');
+const jwt = require('jsonwebtoken');
 require('./config');
-
-const userfileRef = require('./users');
+const User = require('./users'); // Assuming the user model is defined in 'users.js'
 const Post = require('./postModal');
 
-const Jwt = require('jsonwebtoken');
-const { LEGAL_TCP_SOCKET_OPTIONS } = require('mongodb');
-const jwtKey = 'e-comm1';
-
 const app = express();
+const PORT = 3200;
+const JWT_SECRET = 'e-comm-secret-key';
+
 app.use(cors());
 app.use(express.json());
-// In the post route, I am adding comments to understand properly the working of route
-// Handling POST requests to the '/register' endpoint for registration signup
-app.post('/register', async (req, resp) => {
-  console.log(req.body);
-  // Creating a new user instance with the data from the request body
-  let userRef = new userfileRef(req.body);
-  // Saving the new user to the database
-  let result = await userRef.save();
-  // For the sign up registration API, removing the password in response
-  result = result.toObject();
-  delete result.password;
-  Jwt.sign({ result }, jwtKey, { expiresIn: '2h' }, (err, token) => {
-    if (err) {
-      resp.send({ result: "Something went wrong,Please try again after sometime!" });
+
+// User Registration
+app.post('/register', async (req, res) => {
+  try {
+    const { firstName, lastName, emailAddress, password } = req.body;
+
+    // Check if user already exists
+    const existingUser = await User.findOne({ emailAddress });
+
+    if (existingUser) {
+      return res.status(400).json({ message: 'Email address already in use' });
     }
-    resp.send({ result, auth: token });
-  })
 
-  console.log(result);
-  // Sending the result back as the response
+    // Hash password
+    const hashedPassword = await bcrypt.hash(password, 10);
 
-})
-app.get('/posts', verifyToken, async (req, res) => {
+    // Create new user
+    const newUser = new User({
+      firstName,
+      lastName,
+      emailAddress,
+      password: hashedPassword,
+    });
+
+    // Save user to the database
+    await newUser.save();
+
+    // Generate JWT token
+    const token = jwt.sign({ userId: newUser._id }, JWT_SECRET, { expiresIn: '2h' });
+    // Return success response with token
+    res.status(201).json({ message: 'User registered successfully', token });
+    // res.send({ result, auth: token });
+
+  } catch (error) {
+    console.error('Error registering user:', error);
+    res.status(500).json({ message: 'Internal server error' });
+  }
+});
+// Login
+app.post('/login', async (req, res) => {
+  try {
+    const { emailAddress, password } = req.body;
+
+    // Find the user by email address
+    const user = await User.findOne({ emailAddress });
+
+    if (!user) {
+      return res.status(404).json({ message: 'User not found' });
+    }
+
+    // Compare passwords
+    const passwordMatch = await bcrypt.compare(password, user.password);
+
+    if (!passwordMatch) {
+      return res.status(401).json({ message: 'Incorrect password' });
+    }
+
+    // Generate JWT token
+    const token = jwt.sign({ userId: user._id }, JWT_SECRET, { expiresIn: '2h' });
+
+    // Return success response with token
+    res.status(200).json({ message: 'Login successful', token });
+  } catch (error) {
+    console.error('Error logging in user:', error);
+    res.status(500).json({ message: 'Internal server error' });
+  }
+});
+
+// Fetch Posts
+app.get('/posts', authenticateToken, async (req, res) => {
   try {
     const page = parseInt(req.query.page) || 1;
     const limit = parseInt(req.query.limit) || 10;
     const skip = (page - 1) * limit;
 
-    // Fetch posts from the database with pagination
+    // Fetch posts with pagination
     const posts = await Post.find().skip(skip).limit(limit);
 
-    // Respond with the fetched posts
+    // Return posts
     res.json(posts);
   } catch (error) {
-    // If an error occurs, respond with an error message
-    console.error("Error fetching posts:", error);
-    res.status(500).json({ error: "An error occurred while fetching posts" });
+    console.error('Error fetching posts:', error);
+    res.status(500).json({ message: 'Internal server error' });
   }
 });
-function verifyToken(req, resp, next) {
-  
-  
-  let token = req.headers['authorization'];
 
-  if (token) {
-    token = token.split(' ')[1];
-    console.log("middleware called", token);
-    Jwt.verify(token, jwtKey, (err, valid) => {
-      if (err) {
-        resp.status(401).send({ result: "Please provide valid token" });
-      } else {
-        next();
-      }
-    })
+// Middleware to authenticate JWT token
+function authenticateToken(req, res, next) {
+  const token = req.headers['authorization'];
 
-  } else {
-    resp.status(403).send({ result: "Please add token with header" });
+  if (!token) {
+    return res.status(401).json({ message: 'Unauthorized: Missing token' });
   }
 
+  jwt.verify(token.split(' ')[1], JWT_SECRET, (err, decoded) => {
+    if (err) {
+      return res.status(403).json({ message: 'Forbidden: Invalid token' });
+    }
+
+    req.userId = decoded.userId;
+    next();
+  });
 }
+
+// Start server
 app.listen(3200, () => {
   console.log("port connected")
 });
-
