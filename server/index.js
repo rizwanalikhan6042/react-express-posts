@@ -89,6 +89,7 @@ const transporter = nodemailer.createTransport({
   },
 });
 
+in this project , in this particular feature of resetting password , there is a issue coming which I will fix very soon.
 app.post('/reset-password', async (req, res) => {
   try {
     const { emailAddress } = req.body;
@@ -100,10 +101,10 @@ app.post('/reset-password', async (req, res) => {
       return res.status(404).json({ message: 'User not found' });
     }
 
-    // Generate password reset token
+   
     const token = jwt.sign({ userId: user._id }, JWT_SECRET, { expiresIn: '1h' });
 
-    // Send password reset email
+    
     const resetLink = `http://localhost:3200/reset-password/${token}`;
     await transporter.sendMail({
       from: 'alikha394@gmail.com',
