@@ -188,10 +188,10 @@ const Login = () => {
   };
 
   const handleLogin = async (e) => {
-   e.preventDefault();
-   const { emailAddress, password } = userDetails;
-    const result =  axios.post('http://localhost:3200/login', {
-     
+    e.preventDefault();
+    const { emailAddress, password } = userDetails;
+    const result = axios.post('http://localhost:3200/login', {
+
       emailAddress,
       password
     }, {
@@ -199,15 +199,17 @@ const Login = () => {
         'Content-Type': 'application/json'
       }
     })
-    .then((response) => {
-      const result = response.data;
-      console.log(result);
-      // Storing the user's data and authentication token in the browser's local storage
-      // localStorage.setItem('user', JSON.stringify(result.result));
-      localStorage.setItem('token', JSON.stringify(result.token));
-      navigate('/posts'); // If registration is successful, navigate to the home page
-    })
+      .then((response) => {
+        const result = response.data;
+        console.log(result);
+        // Storing the user's data and authentication token in the browser's local storage
+        // localStorage.setItem('user', JSON.stringify(result.result));
+        localStorage.setItem('token', JSON.stringify(result.token));
+        navigate('/posts'); // If registration is successful, navigate to the home page
+      })
   };
+
+ 
 
   return (
     <div className="flex justify-center items-center h-screen">
@@ -246,6 +248,7 @@ const Login = () => {
           >
             Login
           </button>
+         
         </div>
       </form>
       <NavLink to="/signup" className="text-center block mt-4 ml-4 text-blue-500 hover:text-blue-700">
