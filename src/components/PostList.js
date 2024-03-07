@@ -1,182 +1,193 @@
-// // import React, { useState, useEffect } from "react";
-// // import axios from "axios";
-// // import Post from './Post';
-// // import InfiniteScroll from "react-infinite-scroll-component"; // Install this library using npm or yarn
-
-// // const PostList = () => {
-// //   const [posts, setPosts] = useState([]);
-// //   const [hasMore, setHasMore] = useState(true);
-// //   const [page, setPage] = useState(1);
-
-// //   useEffect(() => {
-// //     fetchPosts();
-// //   }, []);
-
-// //   const fetchPosts = () => {
-// //     fetch(`http://localhost:3200/posts?page=${page}&limit=10`)
-// //       .then(response => {
-// //         if (!response.ok) {
-// //           throw new Error('Network response was not ok');
-// //         }
-// //         return response.json();
-// //       })
-// //       .then(data => {
-// //         if (data.length === 0) {
-// //           setHasMore(false);
-// //         } else {
-// //           setPosts(prevPosts => [...prevPosts, ...data]);
-// //           setPage(page + 1);
-// //         }
-// //       })
-// //       .catch(error => {
-// //         console.error("Error fetching posts:", error);
-
-// //       });
-// //   };
-
-// //   return (
-// //     <div className="container mx-auto">
-// //       <h1 className="text-3xl font-bold text-center my-8">Posts</h1>
-// //       <InfiniteScroll
-// //         dataLength={posts.length}
-// //         next={fetchPosts}
-// //         hasMore={hasMore}
-// //         loader={<h4>Loading...</h4>}
-// //         endMessage={<p>No more posts to load</p>}
-// //       >
-// //         {posts.map(post => (
-// //           <Post key={post.id} post={post} />
-// //         ))}
-// //       </InfiniteScroll>
-// //     </div>
-// //   );
-// // };
-
-// // export default PostList;
-// import React, { useState, useEffect } from "react";
-// import axios from "axios";
-// import InfiniteScroll from "react-infinite-scroll-component";
-// import Post from "./Post"; // Assuming you have a Post component to render individual posts
-
-// const PostList = () => {
-//   const [posts, setPosts] = useState([]);
-//   const [hasMore, setHasMore] = useState(true);
-//   const [page, setPage] = useState(1);
-
-//   useEffect(() => {
-//     fetchPosts();
-//   }, []);
-
-//   const fetchPosts = () => {
-//     axios.get(`http://localhost:3200/posts?page=${page}&limit=4`,{
-//       headers: {                  // Authorization header with bearer token
-//         authorization: `bearer ${JSON.parse(localStorage.getItem('token'))}`
-//     }
-//     } )
-//       .then(response => {
-//         setPosts(prevPosts => [...prevPosts, ...response.data]);
-//         setPage(page + 1);
-//         if (response.data.length === 0) {
-//           setHasMore(false);
-//         }
-//       })
-//       .catch(error => {
-//         console.error("Error fetching posts:", error);
-//       });
-//   };
-
-//   return (
-//     <div className="container mx-auto">
-//       <h1 className="text-3xl font-bold text-center my-8">Posts</h1>
-//       <InfiniteScroll
-//         dataLength={posts.length}
-//         next={fetchPosts}
-//         hasMore={hasMore}
-//         loader={<h4>Loading...</h4>}
-//         endMessage={<p>No more posts to load</p>}
-//       >
-//         {posts.map(post => (
-//           <Post key={post.id} post={post} />
-//         ))}
-//       </InfiniteScroll>
-//     </div>
-//   );
-// };
-
-// export default PostList;
-import React, { useState, useEffect } from "react";
+import React, { useEffect, useState } from "react";
 import axios from "axios";
-import InfiniteScroll from "react-infinite-scroll-component";
-import Post from "./Post";
-import { useNavigate } from 'react-router-dom'
+import { useNavigate, NavLink } from "react-router-dom";
 
-const PostList = () => {
-  const [posts, setPosts] = useState([]);
-  const [hasMore, setHasMore] = useState(true);
-  const [page, setPage] = useState(1);
+const Registration = () => {
   const navigate = useNavigate();
 
-  useEffect(() => {
-    fetchPosts();
-  }, []);
+  const [formErrors, setFormErrors] = useState({});
+  const [isFormSubmitted, setIsFormSubmitted] = useState(false);
+  const [pageNum, setPageNum] = useState(1);
+  const [userDetails, setUserDetails] = useState({
+    firstName: "",
+    lastName: "",
+    emailAddress: "",
+    password: "",
+    confirmPassword: "",
+    profilePicture: null, 
+  });
 
-  const fetchPosts = () => {
-    axios.get(`http://localhost:3200/posts?page=${page}&limit=4`, {
-      headers: {                  // Authorization header with bearer token
-        authorization: `bearer ${JSON.parse(localStorage.getItem('token'))}`
+  const handleInputChange = (event) => {
+    const { name, value, type } = event.target;
+
+    if (type === "file") {
+      const file = event.target.files[0];
+      setUserDetails({
+        ...userDetails,
+        [name]: file,
+      });
+    } else {
+      setUserDetails({
+        ...userDetails,
+        [name]: value,
+      });
+    }
+  };
+
+  const validateForm = (values) => {
+    const errors = {};
+    const emailRegex = /^[^\s+@]+@[^\s@]+\.[^\s@]{2,}$/i;
+
+    if (!values.firstName) {
+      errors.firstName = "First Name is required";
+    }
+    if (!values.lastName) {
+      errors.lastName = "Last Name is required";
+    }
+    if (!values.emailAddress) {
+      errors.emailAddress = "Email is required";
+    } else if (!emailRegex.test(values.emailAddress)) {
+      errors.emailAddress = "Invalid email format!";
+    }
+    if (!values.password) {
+      errors.password = "Password is required";
+    } else if (values.password.length < 3) {
+      errors.password = "Password must be at least 3 characters long";
+    } else if (values.password.length > 18) {
+      errors.password = "Password cannot exceed 18 characters";
+    }
+    if (!values.confirmPassword) {
+      errors.confirmPassword = "Confirm Password is required";
+    } else if (values.confirmPassword !== values.password) {
+      errors.confirmPassword = "Passwords do not match";
+    }
+    return errors;
+  };
+
+  const handleSignup = (event) => {
+    event.preventDefault();
+    setFormErrors(validateForm(userDetails));
+    setIsFormSubmitted(true);
+  };
+  const fetchData = async (e) => {
+  
+    e.preventDefault()
+    const { firstName, lastName, emailAddress, password } = userDetails;
+   const result =  axios.post('http://localhost:3200/register', {
+      firstName,
+      lastName,
+      emailAddress,
+      password
+    }, {
+      headers: {
+        'Content-Type': 'application/json'
       }
     })
-      //     In the below code , I tried to make posts cyclic so that when posts end it starts from post one again so it will be infinitely scrolling down nature 
-      // But due to lack of time , I was unable to do it. 
-      // Currently it is successfully fetching 4 posts and when it comes to down it fetch again 
-      .then(response => {
-        if (response.data.length == 0) {
-
-          setPage(1);
-
-          fetchPosts();
-        }
-
-        setPosts(prevPosts => [...prevPosts, ...response.data]);
-        setPage(page + 1);
-
-
-      })
-      .catch(error => {
-        console.error("Error fetching posts:", error);
-      });
-  };
-
-  const handleLogout = () => {
-    localStorage.removeItem('token');
-    navigate('/login');
-  };
+    .then((response) => {
+      const result = response.data;
+      console.log(result);
+      // Storing the user's data and authentication token in the browser's local storage
+      // localStorage.setItem('user', JSON.stringify(result.result));
+      localStorage.setItem('token', JSON.stringify(result.token));
+      navigate('/posts'); // If registration is successful, navigate to the home page
+    })
+    .catch((error) => {
+      console.error("Error registering user:", error);
+    });
+    
+  }
 
   return (
-    <div className="container mx-auto">
-      <button
-        // className="bg-red-500 hover:bg-red-700 text-white font-bold py-2 px-4 rounded focus:outline-none focus:shadow-outline mt-4 mr-4 float-right"
-        className="bg-transparent text-red text-lg font-bold py-2 px-4 rounded focus:outline-none focus:shadow-outline mt-4 mr-4 float-right fixed top-0 right-0"
-        type="button"
-        onClick={handleLogout}
-      >
-        Logout
-      </button>
-      <h1 className="text-3xl font-bold text-center my-8">Posts</h1>
-      <InfiniteScroll
-        dataLength={posts.length}
-        next={fetchPosts}
-        hasMore={hasMore}
-        loader={<h4>Loading...</h4>}
-        endMessage={<p>No more posts to load</p>}
-      >
-        {posts.map(post => (
-          <Post key={post.id} post={post} />
-        ))}
-      </InfiniteScroll>
-
-    </div>
+    <>
+      <div className="flex justify-center items-center h-screen">
+        <form onSubmit={fetchData} className="bg-white shadow-md rounded px-8 pt-6 pb-8 mb-4 w-full max-w-md">
+          <h1 className="text-2xl text-center mb-4">Create an Account</h1>
+          <div className="mb-4">
+            <input
+              className="shadow appearance-none border rounded w-full py-2 px-3 text-gray-700 leading-tight focus:outline-none focus:shadow-outline"
+              type="text"
+              name="firstName"
+              placeholder="First Name"
+              onChange={handleInputChange}
+              value={userDetails.firstName}
+            />
+            <p className="text-red-500 text-xs italic">{formErrors.firstName}</p>
+          </div>
+          <div className="mb-4">
+            <input
+              className="shadow appearance-none border rounded w-full py-2 px-3 text-gray-700 leading-tight focus:outline-none focus:shadow-outline"
+              type="text"
+              name="lastName"
+              placeholder="Last Name"
+              onChange={handleInputChange}
+              value={userDetails.lastName}
+            />
+            <p className="text-red-500 text-xs italic">{formErrors.lastName}</p>
+          </div>
+          <div className="mb-4">
+            <input
+              className="shadow appearance-none border rounded w-full py-2 px-3 text-gray-700 leading-tight focus:outline-none focus:shadow-outline"
+              type="email"
+              name="emailAddress"
+              placeholder="Email Address"
+              onChange={handleInputChange}
+              value={userDetails.emailAddress}
+            />
+            <p className="text-red-500 text-xs italic">{formErrors.emailAddress}</p>
+          </div>
+          <div className="mb-4">
+            <input
+              className="shadow appearance-none border rounded w-full py-2 px-3 text-gray-700 leading-tight focus:outline-none focus:shadow-outline"
+              type="password"
+              name="password"
+              placeholder="Password"
+              onChange={handleInputChange}
+              value={userDetails.password}
+            />
+            <p className="text-red-500 text-xs italic">{formErrors.password}</p>
+          </div>
+          <div className="mb-2">
+            <input
+              className="shadow appearance-none border rounded w-full py-2 px-3 text-gray-700 leading-tight focus:outline-none focus:shadow-outline"
+              type="password"
+              name="confirmPassword"
+              placeholder="Confirm Password"
+              onChange={handleInputChange}
+              value={userDetails.confirmPassword}
+            />
+            <p className="text-red-500 text-xs italic">{formErrors.confirmPassword}</p>
+          </div>
+          <div className="mb-4">
+          <p htmlFor="profilePicture" className="block text-gray-700 text-sm mb-2 mr-10">
+              Profile Picture
+              <img src="https://png.pngtree.com/png-vector/20191110/ourmid/pngtree-avatar-icon-profile-icon-member-login-vector-isolated-png-image_1978396.jpg" alt="Profile Picture" className="inline-block w-5 h-5 " />
+            </p>
+           
+            <input
+              className="shadow appearance-none border rounded w-full py-2 px-3 text-gray-700 leading-tight focus:outline-none focus:shadow-outline"
+              type="file"
+              name="profilePicture"
+              accept="image/*"
+              onChange={handleInputChange}
+            />
+          </div>
+          <div className="flex items-center justify-between">
+            <button
+              className="bg-blue-500 hover:bg-blue-700 text-white font-bold py-2 px-4 rounded focus:outline-none focus:shadow-outline"
+              type = 'submit'
+              // onClick={fetchData}
+            >
+              Register
+            </button>
+          </div>
+        </form>
+        <NavLink to="/login" className="text-center block mt-4 ml-4 text-blue-500 hover:text-blue-700">
+          Already have an account? Sign in
+        </NavLink>
+      </div>
+    </>
   );
 };
 
-export default PostList;
+export default Registration;
+
