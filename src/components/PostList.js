@@ -16,7 +16,7 @@ const PostList = () => {
 
   const fetchPosts = () => {
     axios.get(`http://localhost:3200/posts?page=${page}&limit=4`, {
-      headers: {                  // Authorization header with bearer token
+      headers: {                 
         authorization: `bearer ${JSON.parse(localStorage.getItem('token'))}`
       }
     })
@@ -49,7 +49,7 @@ const PostList = () => {
   return (
     <div className="container mx-auto">
       <button
-        // className="bg-red-500 hover:bg-red-700 text-white font-bold py-2 px-4 rounded focus:outline-none focus:shadow-outline mt-4 mr-4 float-right"
+       
         className="bg-transparent text-red text-lg font-bold py-2 px-4 rounded focus:outline-none focus:shadow-outline mt-4 mr-4 float-right fixed top-0 right-0"
         type="button"
         onClick={handleLogout}
