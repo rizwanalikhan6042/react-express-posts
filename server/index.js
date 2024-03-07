@@ -50,6 +50,7 @@ app.post('/register', async (req, res) => {
     res.status(500).json({ message: 'Internal server error' });
   }
 });
+
 // Login
 app.post('/login', async (req, res) => {
   try {
@@ -79,6 +80,8 @@ app.post('/login', async (req, res) => {
     res.status(500).json({ message: 'Internal server error' });
   }
 });
+
+
 
 // Fetch Posts
 app.get('/posts', authenticateToken, async (req, res) => {
