@@ -34,11 +34,9 @@ const Login = () => {
         .then((response) => {
           const result = response.data;
           console.log(result);
-          // Storing the user's data and authentication token in the browser's local storage
-          // localStorage.setItem('user', JSON.stringify(result.result));
+         
           localStorage.setItem('token', JSON.stringify(result.token));
-          navigate('/posts'); // If registration is successful, navigate to the home page
-        })
+          navigate('/posts'); 
     }
     catch (error) {
       if (error.response.status === 401) {
