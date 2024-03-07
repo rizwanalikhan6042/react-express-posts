@@ -51,6 +51,38 @@ app.post('/register', async (req, res) => {
   }
 });
 
+// Login
+app.post('/login', async (req, res) => {
+  try {
+    const { emailAddress, password } = req.body;
+
+    // Find the user by email address
+    const user = await User.findOne({ emailAddress });
+
+    if (!user) {
+      return res.status(404).json({ message: 'User not found' });
+    }
+
+    // Compare passwords
+    const passwordMatch = await bcrypt.compare(password, user.password);
+
+    if (!passwordMatch) {
+      return res.status(401).json({ message: 'Incorrect password' });
+    }
+
+    // Generate JWT token
+    const token = jwt.sign({ userId: user._id }, JWT_SECRET, { expiresIn: '2h' });
+
+    // Return success response with token
+    res.status(200).json({ message: 'Login successful', token });
+  } catch (error) {
+    console.error('Error logging in user:', error);
+    res.status(500).json({ message: 'Internal server error' });
+  }
+});
+
+
+
 // Fetch Posts
 app.get('/posts', authenticateToken, async (req, res) => {
   try {

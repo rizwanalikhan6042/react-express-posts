@@ -294,6 +294,7 @@ const Registration = () => {
     setIsFormSubmitted(true);
   };
   const fetchData = async (e) => {
+
     e.preventDefault()
     const { firstName, lastName, emailAddress, password } = userDetails;
    const result =  axios.post('http://localhost:3200/register', {
@@ -414,6 +415,5 @@ const Registration = () => {
 };
 
 export default Registration;
-
 
 
