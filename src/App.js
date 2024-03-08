@@ -5,6 +5,8 @@ import Registration from './components/Registration';
 import PostList from './components/PostList';
 import { BrowserRouter as Router, Routes, Route  } from "react-router-dom";
 import { useState } from "react";
+import ForgotPassword from './components/ForgotPassword'
+
 
 
 function App() {
@@ -32,6 +34,7 @@ function App() {
           />
           <Route path="/signup" element={<Registration />}/>
           <Route path="/posts" element={<PostList />} />
+          <Route path="/forgot-password" element={<ForgotPassword />} />
         </Routes>
       </Router>
     </div>
