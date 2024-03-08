@@ -81,18 +81,13 @@ app.post('/login', async (req, res) => {
   }
 });
 
-const transporter = nodemailer.createTransport({
-  service: 'gmail',
-  auth: {
-    user: 'alikha###@gmail.com',   //for security i removed some characters
-    pass: '#######',
-  },
-});
 
-in this project , in this particular feature of resetting password , there is a issue coming which I will fix soon.
-app.post('/reset-password', async (req, res) => {
+
+// Endpoint to handle password reset request
+app.post('/forgot-password', async (req, res) => {
+  const { emailAddress } = req.body;
   try {
-    const { emailAddress } = req.body;
+
 
     // Find user by email address
     const user = await User.findOne({ emailAddress });
@@ -101,10 +96,16 @@ app.post('/reset-password', async (req, res) => {
       return res.status(404).json({ message: 'User not found' });
     }
 
-   
-    const token = jwt.sign({ userId: user._id }, JWT_SECRET, { expiresIn: '1h' });
-
-    
+    // Generate password reset token
+    const token = jwt.sign({ userId: user._id }, JWT_SECRET, { expiresIn: '30m' });
+    const transporter = nodemailer.createTransport({
+      service: 'gmail',
+      auth: {
+        user: 'alikha###@gmail.com',        // here we have to write email and App password 
+        pass: '#####',                     // for that 2 step verification should be on 
+      },
+    });
+    // Send password reset email
     const resetLink = `http://localhost:3200/reset-password/${token}`;
     await transporter.sendMail({
       from: 'alikha###@gmail.com',
