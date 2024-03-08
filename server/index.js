@@ -98,12 +98,25 @@ app.post('/forgot-password', async (req, res) => {
     }
 
     // Generate password reset token
+   app.post('/forgot-password', async (req, res) => {
+  const { emailAddress } = req.body;
+  try {
+
+
+    // Find user by email address
+    const user = await User.findOne({ emailAddress });
+
+    if (!user) {
+      return res.status(404).json({ message: 'User not found' });
+    }
+
+    // Generate password reset token
     const token = jwt.sign({ userId: user._id }, JWT_SECRET, { expiresIn: '30m' });
     const transporter = nodemailer.createTransport({
       service: 'gmail',
       auth: {
-        user: 'alikha###@gmail.com',        // here we have to write email and App password 
-        pass: '#####',                     // for that 2 step verification should be on 
+        user: 'alikha###@gmail.com',              //we have to paste here our email and app password 
+        pass: '########',                         // I didnt written for privacy 
       },
     });
     // Send password reset email
@@ -115,7 +128,7 @@ app.post('/forgot-password', async (req, res) => {
       html: `Click <a href="${resetLink}">here</a> to reset your password.`,
     });
 
-    res.status(200).json({ message: 'Password reset email sent' });
+    res.status(200).json({ message: 'Password reset email sent', token });
   } catch (error) {
     console.error('Error initiating password reset:', error);
     res.status(500).json({ message: 'Internal server error' });
@@ -123,11 +136,12 @@ app.post('/forgot-password', async (req, res) => {
 });
 
 // Endpoint to handle password reset token verification and password update
-app.post('/reset-password/:token', async (req, res) => {
+app.post('/reset-password/:token' ,async (req, res) => {
+  const { token } = req.params;
+  const { newPassword } = req.body;
   try {
-    const { token } = req.params;
-    const { newPassword } = req.body;
 
+     console.log(token);
     // Verify token
     const decodedToken = jwt.verify(token, JWT_SECRET);
 
@@ -148,7 +162,6 @@ app.post('/reset-password/:token', async (req, res) => {
     res.status(500).json({ message: 'Internal server error' });
   }
 });
-
 
 
 // Fetch Posts
