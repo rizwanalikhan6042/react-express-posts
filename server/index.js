@@ -1,15 +1,14 @@
-
 const express = require('express');
 const cors = require('cors');
 const bcrypt = require('bcrypt');
 const jwt = require('jsonwebtoken');
 const nodemailer = require('nodemailer');
 require('./config');
-const User = require('./users'); // Assuming the user model is defined in 'users.js'
+const User = require('./users'); 
 const Post = require('./postModal');
 
 const app = express();
-const PORT = 3200;
+
 const JWT_SECRET = 'e-comm-secret-key';
 
 app.use(cors());
@@ -52,6 +51,7 @@ app.post('/register', async (req, res) => {
     res.status(500).json({ message: 'Internal server error' });
   }
 });
+
 // Login
 app.post('/login', async (req, res) => {
   try {
@@ -81,6 +81,75 @@ app.post('/login', async (req, res) => {
     res.status(500).json({ message: 'Internal server error' });
   }
 });
+
+
+
+// Endpoint to handle password reset request
+app.post('/forgot-password', async (req, res) => {
+  const { emailAddress } = req.body;
+  try {
+
+
+    // Find user by email address
+    const user = await User.findOne({ emailAddress });
+
+    if (!user) {
+      return res.status(404).json({ message: 'User not found' });
+    }
+
+    // Generate password reset token
+    const token = jwt.sign({ userId: user._id }, JWT_SECRET, { expiresIn: '30m' });
+    const transporter = nodemailer.createTransport({
+      service: 'gmail',
+      auth: {
+        user: 'alikha###@gmail.com',        // here we have to write email and App password 
+        pass: '#####',                     // for that 2 step verification should be on 
+      },
+    });
+    // Send password reset email
+    const resetLink = `http://localhost:3200/reset-password/${token}`;
+    await transporter.sendMail({
+      from: 'alikha###@gmail.com',
+      to: emailAddress,
+      subject: 'Password Reset Request',
+      html: `Click <a href="${resetLink}">here</a> to reset your password.`,
+    });
+
+    res.status(200).json({ message: 'Password reset email sent' });
+  } catch (error) {
+    console.error('Error initiating password reset:', error);
+    res.status(500).json({ message: 'Internal server error' });
+  }
+});
+
+// Endpoint to handle password reset token verification and password update
+app.post('/reset-password/:token', async (req, res) => {
+  try {
+    const { token } = req.params;
+    const { newPassword } = req.body;
+
+    // Verify token
+    const decodedToken = jwt.verify(token, JWT_SECRET);
+
+    // Find user by token
+    const user = await User.findOne({ _id: decodedToken.userId });
+
+    if (!user) {
+      return res.status(401).json({ message: 'Invalid token' });
+    }
+
+    // Update user's password
+    user.password = await bcrypt.hash(newPassword, 10);
+    await user.save();
+
+    res.status(200).json({ message: 'Password reset successful' });
+  } catch (error) {
+    console.error('Error resetting password:', error);
+    res.status(500).json({ message: 'Internal server error' });
+  }
+});
+
+
 
 // Fetch Posts
 app.get('/posts', authenticateToken, async (req, res) => {
