@@ -100,18 +100,13 @@ app.get('/posts', authenticateToken, async (req, res) => {
   }
 });
 
-const transporter = nodemailer.createTransport({
-  service: 'gmail',
-  auth: {
-    user: 'alikha394@gmail.com',
-    pass: '#######',
-  },
-});
+
 
 // Endpoint to handle password reset request
-app.post('/reset-password', async (req, res) => {
+app.post('/forgot-password', async (req, res) => {
+  const { emailAddress } = req.body;
   try {
-    const { emailAddress } = req.body;
+
 
     // Find user by email address
     const user = await User.findOne({ emailAddress });
@@ -121,8 +116,14 @@ app.post('/reset-password', async (req, res) => {
     }
 
     // Generate password reset token
-    const token = jwt.sign({ userId: user._id }, JWT_SECRET, { expiresIn: '1h' });
-
+    const token = jwt.sign({ userId: user._id }, JWT_SECRET, { expiresIn: '30m' });
+    const transporter = nodemailer.createTransport({
+      service: 'gmail',
+      auth: {
+        user: 'alikha394@gmail.com',
+        pass: 'vowe qbox cnra sqav',
+      },
+    });
     // Send password reset email
     const resetLink = `http://localhost:3200/reset-password/${token}`;
     await transporter.sendMail({
@@ -132,7 +133,7 @@ app.post('/reset-password', async (req, res) => {
       html: `Click <a href="${resetLink}">here</a> to reset your password.`,
     });
 
-    res.status(200).json({ message: 'Password reset email sent' });
+    res.status(200).json({ message: 'Password reset email sent', token });
   } catch (error) {
     console.error('Error initiating password reset:', error);
     res.status(500).json({ message: 'Internal server error' });
@@ -140,11 +141,12 @@ app.post('/reset-password', async (req, res) => {
 });
 
 // Endpoint to handle password reset token verification and password update
-app.post('/reset-password/:token', async (req, res) => {
+app.post('/reset-password/:token' ,async (req, res) => {
+  const { token } = req.params;
+  const { newPassword } = req.body;
   try {
-    const { token } = req.params;
-    const { newPassword } = req.body;
 
+     console.log(token);
     // Verify token
     const decodedToken = jwt.verify(token, JWT_SECRET);
 
