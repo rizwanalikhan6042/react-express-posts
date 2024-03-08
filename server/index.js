@@ -145,14 +145,14 @@ app.post('/reset-password/:token' ,async (req, res) => {
     // Verify token
     const decodedToken = jwt.verify(token, JWT_SECRET);
 
-    // Find user by token
+    
     const user = await User.findOne({ _id: decodedToken.userId });
 
     if (!user) {
       return res.status(401).json({ message: 'Invalid token' });
     }
 
-    // Update user's password
+   
     user.password = await bcrypt.hash(newPassword, 10);
     await user.save();
 
@@ -170,11 +170,7 @@ app.get('/posts', authenticateToken, async (req, res) => {
     const page = parseInt(req.query.page) || 1;
     const limit = parseInt(req.query.limit) || 10;
     const skip = (page - 1) * limit;
-
-    // Fetch posts with pagination
     const posts = await Post.find().skip(skip).limit(limit);
-
-    // Return posts
     res.json(posts);
   } catch (error) {
     console.error('Error fetching posts:', error);
@@ -188,9 +184,6 @@ app.get('/posts', authenticateToken, async (req, res) => {
 app.post('/forgot-password', async (req, res) => {
   const { emailAddress } = req.body;
   try {
-
-
-    // Find user by email address
     const user = await User.findOne({ emailAddress });
 
     if (!user) {
@@ -229,17 +222,17 @@ app.post('/reset-password/:token' ,async (req, res) => {
   try {
 
      console.log(token);
-    // Verify token
+
     const decodedToken = jwt.verify(token, JWT_SECRET);
 
-    // Find user by token
+   
     const user = await User.findOne({ _id: decodedToken.userId });
 
     if (!user) {
       return res.status(401).json({ message: 'Invalid token' });
     }
 
-    // Update user's password
+   
     user.password = await bcrypt.hash(newPassword, 10);
     await user.save();
 
@@ -268,7 +261,7 @@ function authenticateToken(req, res, next) {
   });
 }
 
-// Start server
+
 app.listen(3200, () => {
   console.log("port connected")
 });
