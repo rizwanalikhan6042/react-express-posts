@@ -46,7 +46,10 @@ const Login = () => {
       }
     }
   }
-
+const handlePasswordReset = () => {
+    // Navigate to the password reset page
+    navigate('/forgot-password');
+  }
 
 
 return (
@@ -86,7 +89,13 @@ return (
         >
           Login
         </button>
-
+        <button
+            className="text-blue-500 hover:text-blue-700 font-bold"
+            type="button"
+            onClick={handlePasswordReset}
+          >
+            Forgot Password?
+          </button>
       </div>
     </form>
     <NavLink to="/signup" className="text-center block mt-4 ml-4 text-blue-500 hover:text-blue-700">
