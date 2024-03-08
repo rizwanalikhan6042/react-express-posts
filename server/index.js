@@ -3,11 +3,11 @@ const cors = require('cors');
 const bcrypt = require('bcrypt');
 const jwt = require('jsonwebtoken');
 require('./config');
-const User = require('./users'); // Assuming the user model is defined in 'users.js'
+const User = require('./users'); 
 const Post = require('./postModal');
 
 const app = express();
-const PORT = 3200;
+
 const JWT_SECRET = 'e-comm-secret-key';
 
 app.use(cors());
@@ -89,7 +89,7 @@ const transporter = nodemailer.createTransport({
   },
 });
 
-in this project , in this particular feature of resetting password , there is a issue coming which I will fix very soon.
+in this project , in this particular feature of resetting password , there is a issue coming which I will fix soon.
 app.post('/reset-password', async (req, res) => {
   try {
     const { emailAddress } = req.body;
